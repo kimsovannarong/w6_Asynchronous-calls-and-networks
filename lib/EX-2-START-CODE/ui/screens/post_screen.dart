@@ -18,7 +18,7 @@ class PostScreen extends StatelessWidget {
         actions: [
           IconButton(
             // 2- Fetch the post
-            onPressed: () => {postProvider.fetchPost(45)},
+            onPressed: () => {postProvider.fetchPost()},
             icon: const Icon(Icons.update),
           ),
         ],
@@ -31,7 +31,6 @@ class PostScreen extends StatelessWidget {
 
   Widget _buildBody(PostProvider courseProvider) {
     final postValue = courseProvider.postValue;
-
     if (postValue == null) {
       return Text('Tap refresh to display post'); // display an empty state
     }
@@ -44,7 +43,20 @@ class PostScreen extends StatelessWidget {
         return Text('Error: ${postValue.error}'); // display a error
 
       case AsyncValueState.success:
-        return PostCard(post: postValue.data!); // display the post
+        if (postValue.data!.isEmpty) {
+          return Center(child: Text('No post for now'));
+        } 
+        else {
+          return SingleChildScrollView(
+            child: SizedBox(
+              child: Column(
+                children: [
+                  ...postValue.data!.map((item) => PostCard(post: item)).toList(),
+                ],
+              ),
+            ),
+          );
+        } // display the post
     }
   }
 }
