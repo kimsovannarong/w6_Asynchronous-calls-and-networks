@@ -1,39 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:w6_flutter/EX-1-START-CODE/providers/course_provider.dart';
+import 'package:w6_flutter/EX-1-START-CODE/screens/course_score_form.dart';
 import '../models/course.dart';
-import 'course_score_form.dart';
 
-class CourseScreen extends StatefulWidget {
-  const CourseScreen({super.key, required this.course});
+class CourseScreen extends StatelessWidget {
+  const CourseScreen({required this.courseID,super.key});
+  final String courseID;
+  // List<CourseScore> get scores => widget.course.scores;
 
-  final Course course;
+  void _addScore(BuildContext context) async {
 
-  @override
-  State<CourseScreen> createState() => _CourseScreenState();
-}
-
-class _CourseScreenState extends State<CourseScreen> {
-  List<CourseScore> get scores => widget.course.scores;
-
-  void _addScore() async {
-    CourseScore? newSCore = await Navigator.of(context).push<CourseScore>(
+    var courseProvider=Provider.of<CourseProvider>(context,listen: false);
+    CourseScore? newScore = await Navigator.of(context).push<CourseScore>(
       MaterialPageRoute(builder: (ctx) => const CourseScoreForm()),
     );
 
-    if (newSCore != null) {
-      setState(() {
-        scores.add(newSCore);
-      });
+    if (newScore != null) {
+     var course=courseProvider.getCoursefor(courseID);
+     courseProvider.addScore(course!, newScore);
     }
   }
-
-  Color scoreColor(double score) {
+   Color scoreColor(double score) {
     return score > 50 ? Colors.green : Colors.orange;
   }
-
   @override
   Widget build(BuildContext context) {
+    var courseProvider=Provider.of<CourseProvider>(context);
+    Course? course= courseProvider.getCoursefor(courseID); // get the course from it id
+    List<CourseScore> scores=course!.scores; // get score from those course
     Widget content = const Center(child: Text('No Scores added yet.'));
-
     if (scores.isNotEmpty) {
       content = ListView.builder(
         itemCount: scores.length,
@@ -50,20 +46,21 @@ class _CourseScreenState extends State<CourseScreen> {
             ),
       );
     }
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: mainColor,
         title: Text(
-          widget.course.name,
+          course.name,
           style: const TextStyle(color: Colors.white),
         ),
         actions: [
-          IconButton(onPressed: _addScore, icon: const Icon(Icons.add)),
+          IconButton(onPressed: () {_addScore(context);}, icon: const Icon(Icons.add)),
         ],
       ),
       body: content,
     );
   }
+  
 }
+

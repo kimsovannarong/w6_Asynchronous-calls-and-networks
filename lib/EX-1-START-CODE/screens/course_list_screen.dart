@@ -1,31 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:w6_flutter/EX-1-START-CODE/providers/course_provider.dart';
 import '../models/course.dart';
 import 'course_screen.dart';
 
 const Color mainColor = Colors.blue;
 
-class CourseListScreen extends StatefulWidget {
+class CourseListScreen extends StatelessWidget {
   const CourseListScreen({super.key});
-
-  @override
-  State<CourseListScreen> createState() => _CourseListScreenState();
-}
-
-class _CourseListScreenState extends State<CourseListScreen> {
-  final List<Course> _allCourses = [Course(name: 'HTML'), Course(name: 'JAVA')];
-
-  void _editCourse(Course course) async {
-    await Navigator.of(context).push<Course>(
-      MaterialPageRoute(builder: (ctx) => CourseScreen(course: course)),
-    );
-
-    setState(() {
-      // trigger a rebuild
-    });
-  }
-
+  
   @override
   Widget build(BuildContext context) {
+
+    void editCourse(Course course) async {
+    // print('Hello');  
+    await Navigator.of(context).push<Course>(
+      MaterialPageRoute(builder: (ctx) => CourseScreen(courseID: course.id)),
+    );
+  }
+    var courseProvider=Provider.of<CourseProvider>(context); // provider accessor
+    List<Course> courses= courseProvider.getCourse(); // get all course from rpovider
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -33,20 +27,22 @@ class _CourseListScreenState extends State<CourseListScreen> {
         title: const Text('SCORE APP', style: TextStyle(color: Colors.white)),
       ),
       body: ListView.builder(
-        itemCount: _allCourses.length,
-        itemBuilder:
-            (ctx, index) => Dismissible(
-              key: Key(_allCourses[index].name),
+        itemCount:courses.length,
+        itemBuilder:(ctx, index) {
+            Course course = courses[index];
+            return  Dismissible(
+              key: Key(course.id),
               child: CourseTile(
-                course: _allCourses[index],
-                onEdit: _editCourse,
+                course: course,
+                onEdit: editCourse,
               ),
-            ),
+            );
+            }
       ),
     );
   }
+  
 }
-
 class CourseTile extends StatelessWidget {
   const CourseTile({super.key, required this.course, required this.onEdit});
 

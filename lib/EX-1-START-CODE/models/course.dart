@@ -1,6 +1,7 @@
+import 'package:uuid/uuid.dart';
 class Course {
-  Course({required this.name});
-
+  Course({required this.name,String? id}):id= id??const Uuid().v4();
+  final String id;
   final String name;
   final List<CourseScore> scores = [];
 
